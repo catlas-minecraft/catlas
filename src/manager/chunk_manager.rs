@@ -54,7 +54,6 @@ impl ChunkManager {
                     None
                 }
             };
-
             if let Some(chunk) = chunk {
                 Some(SectionManager::new(chunk))
             } else {
@@ -63,15 +62,15 @@ impl ChunkManager {
         })
     }
 
-    pub fn get_chunk_by_chunk(&mut self, chunk_xz: XZCoord) -> &mut Option<SectionManager> {
+    pub fn get_chunk_by_chunk_coord(&mut self, chunk_coord: &XZCoord) -> &mut Option<SectionManager> {
         // もっと良い計算方法ありそう
-        let region_chunk_x = (((chunk_xz.x % 32) + 32) % 32) as u8;
-        let region_chunk_z = (((chunk_xz.z % 32) + 32) % 32) as u8;
+        let region_chunk_x = (((chunk_coord.x % 32) + 32) % 32) as u8;
+        let region_chunk_z = (((chunk_coord.z % 32) + 32) % 32) as u8;
 
         self.get_chunk_by_region_chunk(region_chunk_x, region_chunk_z)
     }
 
-    pub fn get_chunk_xz_by_block_xz(block: &XZCoord) -> XZCoord {
+    pub fn get_chunk_coord_by_block_coord(block: &XZCoord) -> XZCoord {
         let chunk_x = block.x / (ChunkManager::CHUNK_SIDE_BLOCK as i32);
         let chunk_z = block.z / (ChunkManager::CHUNK_SIDE_BLOCK as i32);
 
@@ -79,7 +78,7 @@ impl ChunkManager {
     }
 
     pub fn get_chunk_by_block(&mut self, block: &XZCoord) -> &mut Option<SectionManager> {
-        let chunk_xz = ChunkManager::get_chunk_xz_by_block_xz(block);
-        self.get_chunk_by_chunk(chunk_xz)
+        let chunk_coord = ChunkManager::get_chunk_coord_by_block_coord(block);
+        self.get_chunk_by_chunk_coord(&chunk_coord)
     }
 }

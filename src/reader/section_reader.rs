@@ -1,8 +1,8 @@
 use crate::models::Section;
 
-use self::block_states_reader::BlockStatesReader;
-
 mod block_states_reader;
+
+pub use block_states_reader::BlockStatesReader;
 
 #[derive(Debug)]
 pub struct SectionReader {

@@ -5,13 +5,13 @@ mod section_manager;
 
 use std::fmt::Display;
 
-pub use error::ManagerError;
 pub use error::Result;
 
 pub use region_manager::RegionManager;
 pub use chunk_manager::ChunkManager;
 pub use section_manager::SectionManager;
 
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub struct XZCoord {
     x: i32,
     z: i32

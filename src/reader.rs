@@ -1,3 +1,3 @@
 mod section_reader;
 
-pub use section_reader::SectionReader;
+pub use section_reader::*;

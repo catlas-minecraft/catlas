@@ -1,4 +1,4 @@
-use crate::{models::Chunk, reader::SectionReader};
+use crate::{models::Chunk, reader::{FullBlockStatesReader, SectionReader}};
 
 #[derive(Debug)]
 pub struct SectionManager {
@@ -10,7 +10,7 @@ impl SectionManager {
     pub fn new(chunk: Chunk) -> Self {
         SectionManager {
             chunk,
-            inner: Default::default()
+            inner: Vec::new()
         }
     }
 }

@@ -1,6 +1,11 @@
 use std::cmp;
 
-use crate::models::{FullBlockStates, SingleBlockStates, BlockStates, PalettedBlock};
+use crate::models::{
+    FullBlockStates,
+    SingleBlockStates,
+    BlockStates,
+    PalettedBlock
+};
 
 #[derive(Debug)]
 pub enum BlockStatesReader {
@@ -29,8 +34,8 @@ impl From<BlockStates> for BlockStatesReader {
 
 #[derive(Debug)]
 pub struct FullBlockStatesReader {
-    base: FullBlockStates,
-    data_bits: u32
+    pub base: FullBlockStates,
+    pub data_bits: u32
 }
 
 impl FullBlockStatesReader {
@@ -87,6 +92,10 @@ impl SingleBlockStatesReader {
         SingleBlockStatesReader {
             base: block_states
         }
+    }
+
+    pub fn get_block(&self) -> &PalettedBlock {
+        &self.base.palette[0]
     }
 }
 
