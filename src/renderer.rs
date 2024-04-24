@@ -1,86 +1,183 @@
+use crate::{color_map::{BaseColor, BaseColorType, BlockColor, MapColor, BASE_COLOR_MAP}, models::{Chunk, Properties, Section}, reader::{block_states_reader::{FullBlockStatesReader, SingleBlockStatesReader}, BlockStatesReader, SectionReader}};
 
+pub fn render_chunk(chunk: Chunk) -> Vec<MapColor> {
+    let mut non_none_sections: Vec<SectionReader> = Vec::new();
 
-use std::{collections::HashMap, hash::BuildHasherDefault, path::PathBuf};
+    for section in chunk.sections.into_iter().rev() {
+        let reader = SectionReader::new(section);
 
-use rustc_hash::FxHasher;
+        let Some(block_states_reader) = reader.block_states_reader() else {
+            continue;
+        };
 
-type Hasher = BuildHasherDefault<FxHasher>;
+        match &block_states_reader {
+            &BlockStatesReader::FullBlockStatesReader(_) => {
+                non_none_sections.push(reader);
+            },
+            &BlockStatesReader::SingleBlockStatesReader(state_reader) => {
+                let paletted_block = state_reader.get_block();
 
-use crate::{
-    manager::{
-        self,
-        RegionManager,
-        XZCoord
-    }, map_color::{self, BaseColorId}, models::PalettedBlock, reader::{BlockStatesReader, SectionReader}
-};
-
-pub struct Renderer {
-    region_manager: RegionManager
-}
-
-impl Renderer {
-    pub fn new(path: PathBuf) -> Self {
-        let region_manager = manager::RegionManager::new(path);
-
-        Renderer {
-            region_manager
-        }
-    }
-
-    fn render_chunk(&self, x: i32, z: i32) {
-        let mut chunk_renderer = ChunkRenderer::new(&self.region_manager);
-    }
-}
-
-pub struct ChunkRenderer<'a> {
-    manager: &'a RegionManager,
-    sliced_chunks: HashMap<XZCoord, Option<Vec<&'a SectionReader>>, Hasher>,
-    pub heighest_blocks: HashMap<XZCoord, Option<&'a PalettedBlock>, Hasher>
-}
-
-impl<'a> ChunkRenderer<'a> {
-    pub fn new(manager: &'a RegionManager, ) -> ChunkRenderer<'a> {
-        ChunkRenderer {
-            manager,
-            sliced_chunks: HashMap::default(),
-            heighest_blocks: HashMap::default()
-        }
-    }
-
-    pub fn get_sliced_chunks(&mut self, chunk_coord: XZCoord) -> Option<&mut Vec<&'a SectionReader>> {
-        self.sliced_chunks.entry(chunk_coord.clone()).or_insert_with(|| {
-            let chunk = self.manager.get_chunk_by_chunk_coord(&chunk_coord)?;
-
-            let sliced_chunk: Vec<&'a SectionReader> = chunk.inner.iter().filter(|reader| {
-                let Some(block_states_reader) = &reader.block_states_reader else {
-                    return false;
-                };
-
-                match block_states_reader {
-                    BlockStatesReader::FullBlockStatesReader(_) => true,
-                    BlockStatesReader::SingleBlockStatesReader(single_block_states_reader) => {
-
-                        match map_color::BASE_COLOR_ID_MAP.get(&single_block_states_reader.get_block().name) {
-                            Some(color_map) => match color_map.0 {
-                                BaseColorId::Normal(0) => false,
-                                _ => true
-                            }
-                            // TODO: なかった場合はおかしいのでエラー処理を書く
-                            None => false
-                        }
+                if let Some(map_color) = BASE_COLOR_MAP.get(&paletted_block.name) {
+                    if !map_color.kind.is_none() {
+                        non_none_sections.push(reader)
                     }
                 }
-            }).collect();
-
-            Some(sliced_chunk)
-        }).as_mut()
+            }
+        }
     }
 
-    pub fn get_top_block(&mut self, block_coord: &'a XZCoord) -> Option<&'a PalettedBlock> {
-        self.heighest_blocks.entry(block_coord.clone()).or_insert_with(|| {
-            self.manager.get_chunk_by_block_coord(block_coord);
+    let mut map: Vec<MapColor> = Vec::with_capacity((Section::SIZE as usize) * (Section::SIZE as usize));
 
-            None
-        });
+    let mut north_ys: [i32; Section::SIZE as usize] = [0; Section::SIZE as usize];
+
+    for z in 0..Section::SIZE {
+        for x in 0..Section::SIZE {
+            let north_y = north_ys[x as usize];
+
+            let render_result = non_none_sections.render_xy(x, z, north_y);
+
+            let (map_color, y) = if let Some(render_result) = render_result {
+                (render_result.map_color, render_result.real_y)
+            } else {
+                (MapColor::default(), -64)
+            };
+
+            north_ys[x as usize] = y;
+            map.push(map_color);
+        }
+    }
+
+    map
+}
+
+pub struct RenderResult {
+    map_color: MapColor,
+    real_y: i32
+}
+
+impl RenderResult {
+    pub fn new(map_color: MapColor, real_y: i32) -> RenderResult {
+        RenderResult {
+            map_color,
+            real_y
+        }
+    }
+}
+
+trait Renderer {
+    fn render_xy(&self, x: u8, z: u8, north_y: i32) -> Option<RenderResult>;
+}
+
+impl Renderer for Vec<SectionReader> {
+    fn render_xy(&self, x: u8, z: u8, north_y: i32) -> Option<RenderResult> {
+        for section_reader in self {
+            let render_result = section_reader.render_xy(x, z, north_y);
+
+            if let Some(render_result) = render_result{
+                return Some(render_result);
+            }
+        }
+
+        None
+    }
+}
+
+impl Renderer for SectionReader {
+    fn render_xy(&self, x: u8, z: u8, north_y: i32) -> Option<RenderResult> {
+        let Some(block_states_reader) = self.block_states_reader() else {
+            return None;
+        };
+
+        let render = match block_states_reader {
+            BlockStatesReader::FullBlockStatesReader(reader) => reader.render_xz(x, z, self.y, north_y),
+            BlockStatesReader::SingleBlockStatesReader(reader) => reader.render_xz(x, z, self.y, north_y),
+        };
+
+        render
+    }
+}
+
+pub trait PreRenderer {
+    fn render_xz(&self, x: u8, z: u8, chunk_y: i8, north_y: i32) -> Option<RenderResult>;
+}
+
+impl PreRenderer for FullBlockStatesReader {
+    fn render_xz(&self, x: u8, z: u8, chunk_y: i8, north_y: i32) -> Option<RenderResult> {
+
+        for (y_at_chunk, palette_idx) in self.topdown_iter(x, z) {
+            let paletted_block = &self.inner.palette[palette_idx as usize];
+            let base_color = BASE_COLOR_MAP.get(&paletted_block.name);
+
+            if let Some(base_color) = base_color {
+                if !base_color.kind.is_none() {
+                    let real_y = i32::from(y_at_chunk) * i32::from(chunk_y);
+                    let map_color = base_color.render(real_y, north_y, paletted_block.properties.as_ref());
+
+                    let result = RenderResult::new(map_color, real_y);
+                    return Some(result);
+                }
+            } else {
+                println!("[WARN] Failed get block({})", paletted_block);
+            }
+        }
+
+        None
+    }
+}
+
+impl PreRenderer for SingleBlockStatesReader {
+    fn render_xz(&self, x: u8, z: u8, chunk_y: i8, north_y: i32) -> Option<RenderResult> {
+        None
+    }
+}
+
+pub trait BlockColorRenderer {
+    fn render(&self, y: i32, north_y: i32, properties: Option<&Properties>) -> MapColor;
+}
+
+impl BlockColorRenderer for BlockColor {
+    fn render(&self, y: i32, north_y: i32, properties: Option<&Properties>) -> MapColor {
+        let base_color: Option<BaseColor> = match self.kind {
+            BaseColorType::Normal(base_color) => Some(base_color), 
+            BaseColorType::Bed(base_color) => match properties {
+                Some(properties) => match properties.get("part") {
+                    Some(part) => match part.as_str() {
+                        "head" => Some(BaseColor::Wool),
+                        "foot" => Some(base_color),
+                        _ => None
+                    },
+                    None => None
+                },
+                None => None
+            },
+            BaseColorType::Axis(y, other) => match properties {
+                Some(properties) => match properties.get("axis") {
+                    Some(axis) => match axis.as_str() {
+                        "y" => Some(y),
+                        "x" | "z" => Some(other),
+                        _ => None
+                    },
+                    None => None
+                }
+                None => None
+            }
+        };
+
+        let map_color = match base_color {
+            Some(base_color) => {
+                if y == north_y {
+                    MapColor::new(base_color, crate::color_map::MapColorLevel::Normal)
+                } else if y > north_y {
+                    MapColor::new(base_color, crate::color_map::MapColorLevel::Light)
+                } else if y < north_y {
+                    MapColor::new(base_color, crate::color_map::MapColorLevel::Dark)
+                } else {
+                    unreachable!()
+                }
+            },
+            None => MapColor::error()
+        };
+
+        map_color
     }
 }

@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use fastnbt::{Value, error};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Chunk {
     pub sections: Vec<Section>,
 
@@ -27,8 +27,6 @@ pub struct Chunk {
 }
 
 impl Chunk {
-    pub const SIZE: usize = 16;
-
     pub fn from_bytes<'a>(input: &'a [u8]) -> error::Result<Chunk> {
         fastnbt::from_bytes(input)
     }

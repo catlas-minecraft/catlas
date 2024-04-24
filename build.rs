@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate num_derive;
+
 mod map_color;
 mod blocks;
 
@@ -11,6 +14,7 @@ use std::{
     path::Path
 };
 
+use num_traits::FromPrimitive;
 use regex::Regex;
 use rustc_hash::FxHasher;
 
@@ -23,7 +27,8 @@ use crate::{blocks::Block, map_color::find_id_by_states};
 
 type Hasher = BuildHasherDefault<FxHasher>;
 
-include!("./src/map_color/block_attributes.rs");
+include!("./src/color_map/block_attributes.rs");
+include!("./src/color_map/base_color.rs");
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     build_base_color_id_map()?;
@@ -86,15 +91,19 @@ fn build_base_color_id_map() -> Result<(), Box<dyn std::error::Error>> {
         // ColorID タイプを定義
         let block_color = match block_color {
             ColorType::Single(color) => {
-                format!("Normal({})", color)
+                let color = BaseColor::from_i8(*color).unwrap();
+                format!("Normal(BaseColor::{:?})", color)
             },
             ColorType::Multiple(colors) => {
                 // Bed
-                if let Some(id) = find_id_by_states(colors, "part", "foot") {
-                    format!("Bed({})", id)
+                if let Some(color) = find_id_by_states(colors, "part", "foot") {
+                    let color = BaseColor::from_i8(*color).unwrap();
+                    format!("Bed(BaseColor::{:?})", color)
                 } else if let Some(axis_y_id) = find_id_by_states(colors, "axis", "y") {
                     let other_id = find_id_by_states(colors, "axis", "x").unwrap_or(axis_y_id);
-                    format!("Axis({}, {})", axis_y_id, other_id)
+                    let other_id = BaseColor::from_i8(*other_id).unwrap();
+                    let axis_y_id = BaseColor::from_i8(*axis_y_id).unwrap();
+                    format!("Axis(BaseColor::{:?}, BaseColor::{:?})", axis_y_id, other_id)
                 } else {
                     println!("cargo:warning=Cannot find {:?}", colors);
                     String::from("Normal(0)")
@@ -105,23 +114,21 @@ fn build_base_color_id_map() -> Result<(), Box<dyn std::error::Error>> {
         // Attributeを定義
         let mut attributes: BlockAttributes = BlockAttributes::empty();
         for block_states in block_data.states {
-            if block_states.name == "waterlogged" {
-                attributes |= BlockAttributes::WATERLOGGED;
-            } else if block_states.name == "type" {
-                attributes |= BlockAttributes::TYPE;
-            } else if block_states.name == "half" {
-                attributes |= BlockAttributes::HALF;
-            } else if block_states.name == "open" {
-                attributes |= BlockAttributes::OPEN;
+            match block_states.name.as_str() {
+                "waterlogged" => attributes |= BlockAttributes::WATERLOGGED,
+                "type" => attributes |= BlockAttributes::TYPE,
+                "half" => attributes |= BlockAttributes::HALF,
+                "open" => attributes |= BlockAttributes::OPEN,
+                _ => ()
             }
         }
 
-        map.entry(block_full_name, &format!("({}, {})", block_color, attributes.bits()));
+        map.entry(block_full_name, &format!("BlockColor {{kind: {}, attr: {}}}", block_color, attributes.bits()));
     }
 
     write!(
         &mut file,
-        "pub static BASE_COLOR_ID_MAP: phf::Map<&'static str, (BaseColorId, u8)> = {}",
+        "pub static BASE_COLOR_MAP: phf::Map<&'static str, BlockColor> = {}",
         map.build())
         .unwrap();
 

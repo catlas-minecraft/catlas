@@ -2,13 +2,15 @@ use std::{collections::HashMap, fmt::Display};
 
 use serde::{Serialize, Deserialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PalettedBlock {
     #[serde(rename = "Name")]
     pub name: String,
     #[serde(rename = "Properties")]
-    pub properties: Option<HashMap<String, String>>
+    pub properties: Option<Properties>
 }
+
+pub type Properties = HashMap<String, String>;
 
 impl Display for PalettedBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

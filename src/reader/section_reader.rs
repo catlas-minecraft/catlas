@@ -1,24 +1,27 @@
-use crate::models::Section;
+pub mod block_states_reader;
 
-mod block_states_reader;
+use crate::models::Section;
 
 pub use block_states_reader::BlockStatesReader;
 
 #[derive(Debug)]
 pub struct SectionReader {
-    pub block_states_reader: Option<BlockStatesReader>
+    pub y: i8,
+    block_states_reader: Option<BlockStatesReader>
 }
 
 impl<'a> SectionReader {
     pub fn new(section: Section) -> SectionReader {
-        let block_states_reader = match section.block_states {
-            Some(block_states) => Some(BlockStatesReader::new(block_states)),
-            None => None
-        };
+        let block_states_reader = section.block_states.map(Into::into);
 
         SectionReader {
+            y: section.y,
             block_states_reader
         }
+    }
+
+    pub fn block_states_reader(&'a self) -> &'a Option<BlockStatesReader> {
+        &self.block_states_reader
     }
 }
 
