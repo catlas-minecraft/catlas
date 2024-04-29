@@ -17,6 +17,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.108"
 thiserror = "1.0.50"
 phf = { version = "0.11.1" }
+image = "0.25.1"
 rustc-hash = "1.1.0"
 bitflags = "2.4.2"
 num-traits = "0.2"
@@ -34,7 +35,7 @@ thiserror.workspace = true
 phf.workspace = true
 bitflags.workspace = true
 rustc-hash.workspace = true
-image = "0.25.1"
+image.workspace = true
 catlas-colors.workspace = true
 catlas-models.workspace = true
 catlas-reader.workspace = true
