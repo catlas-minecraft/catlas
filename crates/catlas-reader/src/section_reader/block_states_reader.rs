@@ -1,6 +1,6 @@
 mod full_block_states_reader;
 
-use crate::models::{
+use catlas_models::{
     BlockStates, PalettedBlock, SingleBlockStates
 };
 

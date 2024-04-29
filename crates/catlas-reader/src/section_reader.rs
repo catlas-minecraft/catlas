@@ -1,8 +1,7 @@
 pub mod block_states_reader;
 
-use crate::models::Section;
-
 pub use block_states_reader::BlockStatesReader;
+use catlas_models::Section;
 
 #[derive(Debug)]
 pub struct SectionReader {

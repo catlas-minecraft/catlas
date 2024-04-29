@@ -1,3 +1,5 @@
+use num_derive::{FromPrimitive, ToPrimitive};
+
 use super::base_color::BaseColor;
 
 #[derive(Debug, FromPrimitive, ToPrimitive)]

@@ -1,4 +1,7 @@
-use crate::{color_map::{BaseColor, BaseColorType, BlockColor, MapColor, BASE_COLOR_MAP}, models::{Chunk, Properties, Section}, reader::{block_states_reader::{FullBlockStatesReader, SingleBlockStatesReader}, BlockStatesReader, SectionReader}};
+use catlas_models::{Chunk, Properties, Section};
+
+use catlas_colors::{BaseColor, BaseColorType, BlockColor, MapColor, MapColorLevel, BASE_COLOR_MAP};
+use catlas_reader::{block_states_reader::{FullBlockStatesReader, SingleBlockStatesReader}, BlockStatesReader, SectionReader};
 
 pub fn render_chunk(chunk: Chunk) -> Vec<MapColor> {
     let mut non_none_sections: Vec<SectionReader> = Vec::new();
@@ -166,11 +169,11 @@ impl BlockColorRenderer for BlockColor {
         let map_color = match base_color {
             Some(base_color) => {
                 if y == north_y {
-                    MapColor::new(base_color, crate::color_map::MapColorLevel::Normal)
+                    MapColor::new(base_color, MapColorLevel::Normal)
                 } else if y > north_y {
-                    MapColor::new(base_color, crate::color_map::MapColorLevel::Light)
+                    MapColor::new(base_color, MapColorLevel::Light)
                 } else if y < north_y {
-                    MapColor::new(base_color, crate::color_map::MapColorLevel::Dark)
+                    MapColor::new(base_color, MapColorLevel::Dark)
                 } else {
                     unreachable!()
                 }

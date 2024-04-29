@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 
-use crate::models::chunk::BlockStates;
+use crate::chunk::BlockStates;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Section {

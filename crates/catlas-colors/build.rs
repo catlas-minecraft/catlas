@@ -27,8 +27,8 @@ use crate::{blocks::Block, map_color::find_id_by_states};
 
 type Hasher = BuildHasherDefault<FxHasher>;
 
-include!("./src/color_map/block_attributes.rs");
-include!("./src/color_map/base_color.rs");
+include!("./src/block_attributes.rs");
+include!("./src/base_color.rs");
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     build_base_color_id_map()?;

@@ -1,6 +1,6 @@
 use std::cmp;
 
-use crate::models::{FullBlockStates, Section};
+use catlas_models::{FullBlockStates, Section};
 
 #[derive(Debug)]
 pub struct FullBlockStatesReader {

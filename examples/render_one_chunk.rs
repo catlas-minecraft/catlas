@@ -1,8 +1,10 @@
 
 use std::fs::File;
 
-use catlas::{models::Chunk, renderer::render_chunk};
+use catlas::renderer::render_chunk;
+use catlas_models::Chunk;
 use fastanvil::Region;
+use image::ImageFormat;
 
 fn main() {
     println!("start");
@@ -21,7 +23,6 @@ fn main() {
         *pixel = image::Rgba(dot.rgba());
     }
 
-    img.save("result.png").unwrap();
-
-    println!("complete")
+    img.save_with_format("result.webp", ImageFormat::WebP).unwrap();
+    println!("complete");
 }
