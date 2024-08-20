@@ -1,0 +1,12 @@
+[package]
+name = "catlas-renderer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+catlas-reader.workspace = true
+catlas-models.workspace = true
+catlas-colors.workspace = true
+fastanvil.workspace = true
+fastnbt.workspace = true
+thiserror.workspace = true

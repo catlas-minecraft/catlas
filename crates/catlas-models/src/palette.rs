@@ -1,7 +1,7 @@
 
 use std::collections::HashMap;
 
-use crate::models::PalettedBlock;
+use crate::PalettedBlock;
 
 #[derive(Debug)]
 pub struct PaletteCollector {

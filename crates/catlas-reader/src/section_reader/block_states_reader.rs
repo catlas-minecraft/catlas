@@ -1,22 +1,24 @@
 mod full_block_states_reader;
 
-use crate::models::{
+use catlas_models::{
     BlockStates, PalettedBlock, SingleBlockStates
 };
 
-pub use full_block_states_reader::FullBlockStatesReader;
+pub use full_block_states_reader::*;
+
+use crate::YPos;
 
 #[derive(Debug)]
 pub enum BlockStatesReader {
-    FullBlockStatesReader(FullBlockStatesReader),
-    SingleBlockStatesReader(SingleBlockStatesReader)
+    Full(FullBlockStatesReader),
+    Single(SingleBlockStatesReader)
 }
 
 impl BlockStatesReader {
     pub fn new(block_states: BlockStates) -> BlockStatesReader {
         match block_states {
-            BlockStates::FullBlockStates(block_states) => BlockStatesReader::FullBlockStatesReader(block_states.into()),
-            BlockStates::SingleBlockStates(block_states) => BlockStatesReader::SingleBlockStatesReader(block_states.into())
+            BlockStates::FullBlockStates(block_states) => BlockStatesReader::Full(block_states.into()),
+            BlockStates::SingleBlockStates(block_states) => BlockStatesReader::Single(block_states.into())
         }
     }
 }
@@ -24,6 +26,24 @@ impl BlockStatesReader {
 impl From<BlockStates> for BlockStatesReader {
     fn from(value: BlockStates) -> Self {
         BlockStatesReader::new(value)
+    }
+}
+
+pub struct SectYItem<'a> {
+    pub y_in_section: u8,
+    pub paletted_block: &'a PalettedBlock
+}
+
+impl<'a> SectYItem<'a> {
+    pub fn new(y_in_section: u8, paletted_block: &'a PalettedBlock) -> SectYItem<'a> {
+        SectYItem {
+            y_in_section,
+            paletted_block
+        }
+    }
+
+    pub fn to_y_pos_item(self, section_y: i8) -> (YPos, &'a PalettedBlock) {
+        (YPos::new(section_y, self.y_in_section), self.paletted_block)
     }
 }
 
@@ -37,6 +57,10 @@ impl SingleBlockStatesReader {
         SingleBlockStatesReader {
             base: block_states
         }
+    }
+
+    pub fn get_sect_y_item(&self) -> SectYItem {
+        SectYItem::new(15, self.get_block())
     }
 
     pub fn get_block(&self) -> &PalettedBlock {

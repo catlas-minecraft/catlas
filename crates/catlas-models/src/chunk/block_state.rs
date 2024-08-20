@@ -1,7 +1,7 @@
 use fastnbt::LongArray;
 use serde::{Serialize, Deserialize};
 
-use crate::models::PalettedBlock;
+use crate::PalettedBlock;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(untagged)]

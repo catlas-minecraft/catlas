@@ -1,3 +1,5 @@
+use num_derive::{FromPrimitive, ToPrimitive};
+
 #[derive(Debug, FromPrimitive, ToPrimitive, Clone, Copy)]
 #[repr(u8)]
 pub enum BaseColor {
@@ -63,4 +65,10 @@ pub enum BaseColor {
     Deepslate,
     RawIron,
     GlowLichen
+}
+
+impl Default for BaseColor {
+    fn default() -> Self {
+        BaseColor::None
+    }
 }
