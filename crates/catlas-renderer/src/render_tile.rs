@@ -166,7 +166,7 @@ where
 
         let base_color: Option<BaseColor> = 'base: {
             match render_pre_tile_result.block_color.kind {
-                BaseColorType::Normal(base_color) => Some(base_color), 
+                BaseColorType::Normal(base_color) => Some(base_color),
                 BaseColorType::Bed(base_color) => {
                     let Some(ref properties) = paletted_block.properties else { break 'base None };
                     let Some(part) = properties.get("part") else { break 'base None };
