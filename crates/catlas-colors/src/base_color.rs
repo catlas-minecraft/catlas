@@ -66,3 +66,9 @@ pub enum BaseColor {
     RawIron,
     GlowLichen
 }
+
+impl Default for BaseColor {
+    fn default() -> Self {
+        BaseColor::None
+    }
+}

@@ -27,6 +27,7 @@ num-derive = "0.4.2"
 catlas-colors = { path = "crates/catlas-colors" }
 catlas-models = { path = "crates/catlas-models" }
 catlas-reader = { path = "crates/catlas-reader" }
+catlas-renderer = { path = "crates/catlas-renderer" }
 
 [dependencies]
 fastanvil.workspace = true
@@ -39,3 +40,4 @@ image.workspace = true
 catlas-colors.workspace = true
 catlas-models.workspace = true
 catlas-reader.workspace = true
+catlas-renderer.workspace = true

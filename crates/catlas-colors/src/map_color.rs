@@ -2,7 +2,7 @@ use num_derive::{FromPrimitive, ToPrimitive};
 
 use super::base_color::BaseColor;
 
-#[derive(Debug, FromPrimitive, ToPrimitive)]
+#[derive(Debug, FromPrimitive, ToPrimitive, Clone)]
 #[repr(u8)]
 pub enum MapColorLevel {
     Dark,
@@ -12,27 +12,31 @@ pub enum MapColorLevel {
     Deep
 }
 
-#[derive(Debug)]
+impl Default for MapColorLevel {
+    fn default() -> Self {
+        MapColorLevel::Light
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct MapColor {
     pub base: BaseColor,
     pub level: MapColorLevel
 }
 
-impl Default for MapColor {
-    fn default() -> Self {
+impl MapColor {
+    pub const fn none() -> MapColor {
         MapColor {
             base: BaseColor::None,
             level: MapColorLevel::Light
         }
     }
-}
 
-impl MapColor {
-    pub fn error() -> MapColor {
+    pub const fn error() -> MapColor {
         MapColor::new(BaseColor::None, MapColorLevel::Deep)
     }
 
-    pub fn new(base_color: BaseColor, level: MapColorLevel) -> MapColor {
+    pub const fn new(base_color: BaseColor, level: MapColorLevel) -> MapColor {
         MapColor {
             base: base_color,
             level
@@ -415,5 +419,11 @@ impl MapColor {
 impl From<(BaseColor, MapColorLevel)> for MapColor {
     fn from((base, level): (BaseColor, MapColorLevel)) -> Self {
         MapColor::new(base, level)
+    }
+}
+
+impl Default for MapColor {
+    fn default() -> Self {
+        Self::none()
     }
 }

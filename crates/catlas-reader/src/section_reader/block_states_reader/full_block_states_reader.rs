@@ -2,6 +2,8 @@ use std::cmp;
 
 use catlas_models::{FullBlockStates, Section};
 
+use super::SectYItem;
+
 #[derive(Debug)]
 pub struct FullBlockStatesReader {
     pub inner: FullBlockStates,
@@ -26,7 +28,7 @@ impl FullBlockStatesReader {
     pub fn to_data_bits(palette_len: usize) -> u32 {
         cmp::max(
             FullBlockStatesReader::MIN_BITS_PER_DATA,
-            usize::BITS - (palette_len).leading_zeros()
+            usize::BITS - (palette_len - 1).leading_zeros()
         )
     }
 
@@ -51,7 +53,7 @@ impl FullBlockStatesReader {
         let block_bit_mask = FullBlockStatesReader::to_bit_mask(block_bits);
 
         if block_states.data.len() != data_vec_len as usize {
-            println!("[warn] real block_data len mismatches calculated len")
+            println!("[warn] real block_data len mismatches calculated len");
         }
 
         FullBlockStatesReader {
@@ -76,8 +78,8 @@ impl FullBlockStatesReader {
         shifted as u16 & self.block_bit_mask
     }
 
-    pub fn topdown_iter(&self, x: u8, z: u8) -> XZTopDownSectionIter {
-        XZTopDownSectionIter::new(self, x, z)
+    pub fn y_direction_iter(&self, x: u8, z: u8) -> FullBlockStateYDirectionIter {
+        FullBlockStateYDirectionIter::new(self, x, z)
     }
 }
 
@@ -88,22 +90,22 @@ impl From<FullBlockStates> for FullBlockStatesReader {
 }
 
 /// Arguments x ,z y 15 ~ iterates to 0
-pub struct XZTopDownSectionIter<'a> {
+pub struct FullBlockStateYDirectionIter<'a> {
     x: u8,
     y: u8,
     z: u8,
     sect: &'a FullBlockStatesReader
 }
 
-impl<'a> XZTopDownSectionIter<'a> {
-    pub fn new(sect: &'a FullBlockStatesReader, x: u8, z: u8) -> XZTopDownSectionIter {
-        Self::with_start(&sect, x, 16, z)
+impl<'a> FullBlockStateYDirectionIter<'a> {
+    pub fn new(sect: &'a FullBlockStatesReader, x: u8, z: u8) -> FullBlockStateYDirectionIter {
+        Self::starts_from(&sect, x, 15, z)
     }
 
-    pub fn with_start(sect: &'a FullBlockStatesReader, x: u8, y: u8, z: u8) -> XZTopDownSectionIter {
-        XZTopDownSectionIter {
+    pub fn starts_from(sect: &'a FullBlockStatesReader, x: u8, y: u8, z: u8) -> FullBlockStateYDirectionIter {
+        FullBlockStateYDirectionIter {
             x,
-            y,
+            y: y + 1,
             z,
             sect
         }
@@ -114,8 +116,6 @@ impl<'a> XZTopDownSectionIter<'a> {
     }
 }
 
-/// 
-/// 
 /// ```
 /// let section_reader = SectionReader::new();
 /// 
@@ -123,19 +123,19 @@ impl<'a> XZTopDownSectionIter<'a> {
 ///     // Your code
 /// }
 /// ```
-/// 
-impl<'a> Iterator for XZTopDownSectionIter<'a> {
-    type Item = (u8, u16);
+impl<'a> Iterator for FullBlockStateYDirectionIter<'a> {
+    type Item = SectYItem<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let item = if let Some(y) = self.y.checked_sub(1) {
-            self.y = y;
+        let y = self.y.checked_sub(1)?;
+        self.y = y;
 
-            Some((y, self.sect.get_block_by_xyz(self.x, y, self.z)))
-        } else {
-            None
-        };
+        let paletted_block = &self.sect.inner.palette[
+            self.sect.get_block_by_xyz(self.x, y, self.z) as usize
+        ];
 
-        item
+        Some(
+            SectYItem::new(y, paletted_block)
+        )
     }
 }

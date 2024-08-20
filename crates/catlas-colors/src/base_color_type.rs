@@ -10,12 +10,13 @@ pub enum BaseColorType {
 
 impl BaseColorType {
     pub fn is_none(&self) -> bool {
-        match self {
-            BaseColorType::Normal(base_color) => match base_color {
-                BaseColor::None => {
-                    true
-                },
-                _ => false
+        let BaseColorType::Normal(base_color) = self else {
+            return false;
+        };
+
+        match base_color {
+            BaseColor::None => {
+                true
             },
             _ => false
         }

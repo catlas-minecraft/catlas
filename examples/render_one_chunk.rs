@@ -1,28 +1,30 @@
 
+use std::time;
 use std::fs::File;
 
-use catlas::renderer::render_chunk;
-use catlas_models::Chunk;
+use catlas_models::Section;
+use catlas_renderer::Render;
 use fastanvil::Region;
-use image::ImageFormat;
+use image::{ImageFormat, RgbaImage};
 
 fn main() {
-    println!("start");
-    let region = File::open("./chunks/r.0.0.mca").unwrap();
+    let now = time::Instant::now();
+
+    let region = File::open("./chunks/r.-1.0.my.mca").unwrap();
     let mut region = Region::from_stream(region).unwrap();
 
-    let chunk = region.read_chunk(15, 15).unwrap().unwrap();
+    let mut north_y_coords = [[0; Section::SIZE as usize]; 32];
+    let map = region.render(&mut north_y_coords).unwrap();
 
-    let chunk: Chunk = fastnbt::from_bytes(&chunk).unwrap();
-
-    let map = render_chunk(chunk);
-
-    let mut img = image::RgbaImage::new(16, 16);
+    let mut img = RgbaImage::new(Section::SIZE as u32 * 32, Section::SIZE as u32 * 32);
 
     for (dot, pixel) in map.iter().zip(img.pixels_mut()) {
         *pixel = image::Rgba(dot.rgba());
     }
 
+    println!("{:?}", now.elapsed());
+
+    img.save_with_format("result.png", ImageFormat::Png).unwrap();
     img.save_with_format("result.webp", ImageFormat::WebP).unwrap();
-    println!("complete");
+    img.save_with_format("result.gif", ImageFormat::Gif).unwrap();
 }
