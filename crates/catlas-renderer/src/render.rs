@@ -51,12 +51,12 @@ impl<S> Render for Region<S>
 where
     S: Read + Write + Seek
 {
-    type Map = Result<[MapColor; Section::SIZE as usize * Section::SIZE as usize * REGION_SIZE * REGION_SIZE]>;
+    type Map = Result<Vec<MapColor>>;
     type NorthYCoords = [[i32; Section::SIZE as usize]; REGION_SIZE];
 
     fn render(&mut self, north_y_coords: &mut Self::NorthYCoords) -> Self::Map {
         const NONE: MapColor = MapColor::none();
-        let mut map = [NONE; Section::SIZE as usize * Section::SIZE as usize * REGION_SIZE * REGION_SIZE];
+        let mut map = vec![NONE; Section::SIZE as usize * Section::SIZE as usize * REGION_SIZE * REGION_SIZE];
 
         for x in 0..REGION_SIZE {
             for z in 0..REGION_SIZE {
