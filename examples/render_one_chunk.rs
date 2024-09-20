@@ -10,7 +10,7 @@ use image::{ImageFormat, RgbaImage};
 fn main() {
     let now = time::Instant::now();
 
-    let region = File::open("./chunks/r.-1.0.my.mca").unwrap();
+    let region = File::open("./chunks/r.0.0.my.mca").unwrap();
     let mut region = Region::from_stream(region).unwrap();
 
     let mut north_y_coords = [[0; Section::SIZE as usize]; 32];
