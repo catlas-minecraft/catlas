@@ -8,5 +8,5 @@ pub enum CatlasRenderError {
     ReadChunkError(#[source] fastanvil::Error),
 
     #[error("Failed deserialize chunk: {}", .0)]
-    ChunkDerError(#[source] fastnbt::error::Error)
+    ChunkDerError(#[source] fastnbt::error::Error),
 }

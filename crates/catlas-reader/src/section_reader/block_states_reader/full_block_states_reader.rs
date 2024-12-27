@@ -5,30 +5,31 @@ use catlas_models::{FullBlockStates, Section};
 use super::SectYItem;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct FullBlockStatesReader {
     pub inner: FullBlockStates,
     block_bits: u32,
     block_per_element: u32,
     data_vec_len: u32,
-    block_bit_mask: u16
+    block_bit_mask: u16,
 }
 
 impl FullBlockStatesReader {
     const MIN_BITS_PER_DATA: u32 = 4;
 
-    /// 
+    ///
     /// Returns the number of digits in binary for the number of pallets
     /// ```
     /// let palette_len: u8    = 0b00000111;
     /// let zeros          = palette_len.leadning_zeros(); // Return 5
-    /// 
+    ///
     /// assert!(u8::BITS - zeros == 3);
     /// ```
-    /// 
+    ///
     pub fn to_data_bits(palette_len: usize) -> u32 {
         cmp::max(
             FullBlockStatesReader::MIN_BITS_PER_DATA,
-            usize::BITS - (palette_len - 1).leading_zeros()
+            usize::BITS - (palette_len - 1).leading_zeros(),
         )
     }
 
@@ -36,12 +37,12 @@ impl FullBlockStatesReader {
         u64::BITS / bits
     }
 
-    /// 
+    ///
     /// ```
     /// assert!(0b111 == SectionReader::to_bit_mask(3));
     /// assert!(0b11111 == SectionReader::to_bit_mask(5));
     /// ```
-    /// 
+    ///
     pub fn to_bit_mask(data_bits: u32) -> u16 {
         (1 << data_bits) - 1
     }
@@ -49,7 +50,9 @@ impl FullBlockStatesReader {
     pub fn new(block_states: FullBlockStates) -> FullBlockStatesReader {
         let block_bits = FullBlockStatesReader::to_data_bits(block_states.palette.len());
         let block_per_element = FullBlockStatesReader::calc_block_per_element(block_bits);
-        let data_vec_len = ((Section::SIZE as u32) * (Section::SIZE as u32) * (Section::SIZE as u32)).div_ceil(block_per_element);
+        let data_vec_len =
+            ((Section::SIZE as u32) * (Section::SIZE as u32) * (Section::SIZE as u32))
+                .div_ceil(block_per_element);
         let block_bit_mask = FullBlockStatesReader::to_bit_mask(block_bits);
 
         if block_states.data.len() != data_vec_len as usize {
@@ -61,7 +64,7 @@ impl FullBlockStatesReader {
             block_bits,
             block_per_element,
             data_vec_len,
-            block_bit_mask
+            block_bit_mask,
         }
     }
 
@@ -73,7 +76,8 @@ impl FullBlockStatesReader {
         let block_at_vec = (block_pos as u32) / self.block_per_element;
         let block_at_ele = (block_pos as u32) % self.block_per_element;
 
-        let shifted = (self.inner.data[block_at_vec as usize] as u64) >> (block_at_ele * self.block_bits);
+        let shifted =
+            (self.inner.data[block_at_vec as usize] as u64) >> (block_at_ele * self.block_bits);
 
         shifted as u16 & self.block_bit_mask
     }
@@ -94,20 +98,25 @@ pub struct FullBlockStateYDirectionIter<'a> {
     x: u8,
     y: u8,
     z: u8,
-    sect: &'a FullBlockStatesReader
+    sect: &'a FullBlockStatesReader,
 }
 
 impl<'a> FullBlockStateYDirectionIter<'a> {
-    pub fn new(sect: &'a FullBlockStatesReader, x: u8, z: u8) -> FullBlockStateYDirectionIter {
+    pub fn new(sect: &'a FullBlockStatesReader, x: u8, z: u8) -> FullBlockStateYDirectionIter<'a> {
         Self::starts_from(&sect, x, 15, z)
     }
 
-    pub fn starts_from(sect: &'a FullBlockStatesReader, x: u8, y: u8, z: u8) -> FullBlockStateYDirectionIter {
+    pub fn starts_from(
+        sect: &'a FullBlockStatesReader,
+        x: u8,
+        y: u8,
+        z: u8,
+    ) -> FullBlockStateYDirectionIter<'a> {
         FullBlockStateYDirectionIter {
             x,
             y: y + 1,
             z,
-            sect
+            sect,
         }
     }
 
@@ -118,7 +127,7 @@ impl<'a> FullBlockStateYDirectionIter<'a> {
 
 /// ```
 /// let section_reader = SectionReader::new();
-/// 
+///
 /// for (y, pallette_idx) in section_reader.topdown_iter() {
 ///     // Your code
 /// }
@@ -130,12 +139,9 @@ impl<'a> Iterator for FullBlockStateYDirectionIter<'a> {
         let y = self.y.checked_sub(1)?;
         self.y = y;
 
-        let paletted_block = &self.sect.inner.palette[
-            self.sect.get_block_by_xyz(self.x, y, self.z) as usize
-        ];
+        let paletted_block =
+            &self.sect.inner.palette[self.sect.get_block_by_xyz(self.x, y, self.z) as usize];
 
-        Some(
-            SectYItem::new(y, paletted_block)
-        )
+        Some(SectYItem::new(y, paletted_block))
     }
 }

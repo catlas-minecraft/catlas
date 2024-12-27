@@ -5,7 +5,7 @@ pub enum BaseColorType {
     Normal(BaseColor),
     Bed(BaseColor),
     /// Axis y, other
-    Axis(BaseColor, BaseColor)
+    Axis(BaseColor, BaseColor),
 }
 
 impl BaseColorType {
@@ -15,10 +15,8 @@ impl BaseColorType {
         };
 
         match base_color {
-            BaseColor::None => {
-                true
-            },
-            _ => false
+            BaseColor::None => true,
+            _ => false,
         }
     }
 }

@@ -4,22 +4,22 @@ use catlas_reader::{SectionReader, YPosItem};
 #[derive(Debug)]
 pub struct RenderPreTileResult<'a> {
     pub y_pos_item: YPosItem<'a>,
-    pub block_color: BlockColor
+    pub block_color: BlockColor,
 }
 
 pub trait RenderPreTile<'a> {
     fn render_pre_tile(self, x: u8, z: u8) -> Option<RenderPreTileResult<'a>>;
 }
 
-impl<'a, II, I> RenderPreTile<'a> for II
+impl<'a, I> RenderPreTile<'a> for I
 where
-    II: IntoIterator<Item = &'a SectionReader, IntoIter = I>,
-    I: Iterator<Item = &'a SectionReader> + Sized + DoubleEndedIterator
+    I: Iterator<Item = &'a SectionReader> + Sized + DoubleEndedIterator,
 {
     fn render_pre_tile(self, x: u8, z: u8) -> Option<RenderPreTileResult<'a>> {
-        let iter = IntoIterator::into_iter(self).rev().filter_map(|el| {
-            el.y_direction_iter(x, z)
-        }).flatten();
+        let iter = self
+            .rev()
+            .filter_map(|el| el.y_direction_iter(x, z))
+            .flatten();
 
         for (y_pos, paletted_block) in iter {
             let block_color = BASE_COLOR_MAP.get(&paletted_block.name);
@@ -32,7 +32,7 @@ where
             if !block_color.kind.is_none() {
                 let render_result = RenderPreTileResult {
                     y_pos_item: (y_pos, &paletted_block),
-                    block_color: *block_color
+                    block_color: *block_color,
                 };
 
                 return Some(render_result);

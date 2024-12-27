@@ -64,7 +64,7 @@ pub enum BaseColor {
     WarpedWartBlock,
     Deepslate,
     RawIron,
-    GlowLichen
+    GlowLichen,
 }
 
 impl Default for BaseColor {

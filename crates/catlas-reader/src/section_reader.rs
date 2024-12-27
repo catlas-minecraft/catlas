@@ -11,7 +11,7 @@ use crate::y_pos::YPosItem;
 #[derive(Debug)]
 pub struct SectionReader {
     pub y: i8,
-    pub block_states_reader: Option<BlockStatesReader>
+    pub block_states_reader: Option<BlockStatesReader>,
 }
 
 impl SectionReader {
@@ -20,7 +20,7 @@ impl SectionReader {
 
         SectionReader {
             y: section.y,
-            block_states_reader
+            block_states_reader,
         }
     }
 
@@ -28,10 +28,10 @@ impl SectionReader {
         Some(match self.block_states_reader.as_ref()? {
             BlockStatesReader::Full(state) => {
                 SectionYDirectionIter::Full(self.y, state.y_direction_iter(x, z))
-            },
-            BlockStatesReader::Single(state) => {
-                SectionYDirectionIter::Single(std::iter::once(state.get_sect_y_item().to_y_pos_item(self.y)))
-            },
+            }
+            BlockStatesReader::Single(state) => SectionYDirectionIter::Single(std::iter::once(
+                state.get_sect_y_item().to_y_pos_item(self.y),
+            )),
         })
     }
 }
@@ -44,7 +44,7 @@ impl From<Section> for SectionReader {
 
 pub enum SectionYDirectionIter<'a> {
     Full(i8, FullBlockStateYDirectionIter<'a>),
-    Single(Once<YPosItem<'a>>)
+    Single(Once<YPosItem<'a>>),
 }
 
 impl<'a> Iterator for SectionYDirectionIter<'a> {
@@ -52,7 +52,9 @@ impl<'a> Iterator for SectionYDirectionIter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         match self {
-            SectionYDirectionIter::Full(section_y, iter) => Some(iter.next()?.to_y_pos_item(*section_y)),
+            SectionYDirectionIter::Full(section_y, iter) => {
+                Some(iter.next()?.to_y_pos_item(*section_y))
+            }
             SectionYDirectionIter::Single(iter) => iter.next(),
         }
     }

@@ -7,7 +7,7 @@ pub struct ChunkReader {
 
     pub x_pos: i32,
     pub y_pos: i32,
-    pub z_pos: i32
+    pub z_pos: i32,
 }
 
 impl ChunkReader {
@@ -16,7 +16,7 @@ impl ChunkReader {
             sections: chunk.sections.into_iter().map(Into::into).collect(),
             x_pos: chunk.x_pos,
             y_pos: chunk.y_pos,
-            z_pos: chunk.z_pos
+            z_pos: chunk.z_pos,
         }
     }
 }

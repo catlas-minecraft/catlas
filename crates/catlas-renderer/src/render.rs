@@ -1,11 +1,14 @@
-use std::io::{Write, Read, Seek};
+use std::io::{Read, Seek, Write};
 
-use catlas_colors::MapColor;
+use catlas_colors::{MapColor, BASE_COLOR_MAP};
 use catlas_models::{Chunk, Section};
-use catlas_reader::ChunkReader;
+use catlas_reader::{BlockStatesReader, ChunkReader};
 use fastanvil::Region;
 
-use crate::{RenderPreTile, RenderTile, error::{CatlasRenderError, Result}};
+use crate::{
+    error::{CatlasRenderError, Result},
+    RenderPreTile, RenderTile,
+};
 
 const REGION_SIZE: usize = 32;
 
@@ -16,25 +19,44 @@ pub trait Render {
     fn render(&mut self, north_y_coords: &mut Self::NorthYCoords) -> Self::Map;
 }
 
-
-impl<'a: 'b, 'b> Render for ChunkReader
-{
+impl Render for ChunkReader {
     type Map = [MapColor; Section::SIZE as usize * Section::SIZE as usize];
     type NorthYCoords = [i32; Section::SIZE as usize];
 
     fn render(&mut self, north_y_coords: &mut Self::NorthYCoords) -> Self::Map {
         const NONE: MapColor = MapColor::none();
         let mut map: Self::Map = [NONE; Section::SIZE as usize * Section::SIZE as usize];
+        let filterd_sections: Vec<_> = self
+            .sections
+            .iter()
+            .filter(|section| {
+                let Some(BlockStatesReader::Single(block_state_reader)) =
+                    &section.block_states_reader
+                else {
+                    return true;
+                };
+
+                let Some(block_color) = BASE_COLOR_MAP.get(&block_state_reader.get_block().name)
+                else {
+                    return true;
+                };
+
+                !block_color.kind.is_none()
+            })
+            .collect();
 
         for z in 0..Section::SIZE {
             for x in 0..Section::SIZE {
                 let north_y = north_y_coords[x as usize];
 
-                let pre_rendered = self.sections.render_pre_tile(x, z);
+                let pre_rendered = filterd_sections
+                    .iter()
+                    .map(|section| *section)
+                    .render_pre_tile(x, z);
 
                 north_y_coords[x as usize] = match &pre_rendered {
                     Some(pre_rendered) => pre_rendered.y_pos_item.0.real_y(),
-                    None => Chunk::Y_BOTTOM
+                    None => Chunk::Y_BOTTOM,
                 };
 
                 let map_color = self.sections.render_tile(x, z, north_y, pre_rendered);
@@ -49,35 +71,44 @@ impl<'a: 'b, 'b> Render for ChunkReader
 
 impl<S> Render for Region<S>
 where
-    S: Read + Write + Seek
+    S: Read + Write + Seek,
 {
     type Map = Result<Vec<MapColor>>;
     type NorthYCoords = [[i32; Section::SIZE as usize]; REGION_SIZE];
 
     fn render(&mut self, north_y_coords: &mut Self::NorthYCoords) -> Self::Map {
-        const NONE: MapColor = MapColor::none();
-        let mut map = vec![NONE; Section::SIZE as usize * Section::SIZE as usize * REGION_SIZE * REGION_SIZE];
+        const MAPCOLOR_NONE: MapColor = MapColor::none();
+        let mut map =
+            vec![
+                MAPCOLOR_NONE;
+                Section::SIZE as usize * Section::SIZE as usize * REGION_SIZE * REGION_SIZE
+            ];
 
         for x in 0..REGION_SIZE {
             for z in 0..REGION_SIZE {
-                let Some(chunk) = self.read_chunk(x, z).map_err(CatlasRenderError::ReadChunkError)? else {
+                let Some(chunk) = self
+                    .read_chunk(x, z)
+                    .map_err(CatlasRenderError::ReadChunkError)?
+                else {
                     north_y_coords[x] = [Chunk::Y_BOTTOM; Section::SIZE as usize];
                     continue;
                 };
 
-                let mut chunk: ChunkReader = fastnbt::from_bytes::<Chunk>(&chunk).map_err(CatlasRenderError::ChunkDerError)?.into();
+                let mut chunk: ChunkReader = fastnbt::from_bytes::<Chunk>(&chunk)
+                    .map_err(CatlasRenderError::ChunkDerError)?
+                    .into();
                 let chunk_map = chunk.render(&mut north_y_coords[x]);
 
-                let start = x * Section::SIZE as usize + z * (Section::SIZE as usize).pow(2) * REGION_SIZE;
+                let start =
+                    x * Section::SIZE as usize + z * (Section::SIZE as usize).pow(2) * REGION_SIZE;
 
                 for chunk_z in 0..Section::SIZE as usize {
                     let start = start + chunk_z * Section::SIZE as usize * REGION_SIZE;
                     let chunk_start = chunk_z * Section::SIZE as usize;
 
-                    map[start..start + Section::SIZE as usize]
-                        .clone_from_slice(
-                            &chunk_map[chunk_start..chunk_start + Section::SIZE as usize]
-                        );
+                    map[start..start + Section::SIZE as usize].clone_from_slice(
+                        &chunk_map[chunk_start..chunk_start + Section::SIZE as usize],
+                    );
                 }
             }
         }

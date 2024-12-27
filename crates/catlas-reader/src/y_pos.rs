@@ -3,12 +3,15 @@ use catlas_models::PalettedBlock;
 #[derive(Debug)]
 pub struct YPos {
     section_y: i8,
-    y_in_section: u8
+    y_in_section: u8,
 }
 
 impl YPos {
     pub fn new(section_y: i8, y_in_section: u8) -> YPos {
-        YPos { section_y, y_in_section }
+        YPos {
+            section_y,
+            y_in_section,
+        }
     }
 
     pub fn real_y(&self) -> i32 {

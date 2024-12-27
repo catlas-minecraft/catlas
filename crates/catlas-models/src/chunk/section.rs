@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crate::chunk::BlockStates;
 
@@ -6,7 +6,7 @@ use crate::chunk::BlockStates;
 pub struct Section {
     pub block_states: Option<BlockStates>,
     #[serde(rename = "Y")]
-    pub y: i8
+    pub y: i8,
 }
 
 impl Section {

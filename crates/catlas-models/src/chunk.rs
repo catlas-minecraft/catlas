@@ -1,10 +1,10 @@
-mod section;
 mod block_state;
+mod section;
 
-pub use section::Section;
 pub use block_state::BlockStates;
 pub use block_state::FullBlockStates;
 pub use block_state::SingleBlockStates;
+pub use section::Section;
 
 use fastnbt::error;
 use serde::{Deserialize, Serialize};
@@ -18,7 +18,7 @@ pub struct Chunk {
     #[serde(rename = "yPos")]
     pub y_pos: i32,
     #[serde(rename = "zPos")]
-    pub z_pos: i32
+    pub z_pos: i32,
 }
 
 impl Chunk {
