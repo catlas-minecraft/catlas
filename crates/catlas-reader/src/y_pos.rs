@@ -1,6 +1,6 @@
 use catlas_models::PalettedBlock;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct YPos {
     section_y: i8,
     y_in_section: u8,
@@ -19,4 +19,15 @@ impl YPos {
     }
 }
 
-pub type YPosItem<'a> = (YPos, &'a PalettedBlock);
+#[derive(Debug)]
+pub struct YPosItem<'a> {
+    pub y_pos: YPos,
+    pub paletted_block: &'a PalettedBlock,
+    pub kind: YPosItemKind,
+}
+
+#[derive(Debug)]
+pub enum YPosItemKind {
+    Single,
+    Full,
+}

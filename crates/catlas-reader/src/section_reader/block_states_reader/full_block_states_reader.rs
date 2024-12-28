@@ -142,6 +142,9 @@ impl<'a> Iterator for FullBlockStateYDirectionIter<'a> {
         let paletted_block =
             &self.sect.inner.palette[self.sect.get_block_by_xyz(self.x, y, self.z) as usize];
 
-        Some(SectYItem::new(y, paletted_block))
+        Some(SectYItem::Full {
+            y_in_section: y,
+            paletted_block: paletted_block,
+        })
     }
 }

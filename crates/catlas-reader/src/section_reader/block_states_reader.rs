@@ -4,7 +4,7 @@ use catlas_models::{BlockStates, PalettedBlock, SingleBlockStates};
 
 pub use full_block_states_reader::*;
 
-use crate::YPos;
+use crate::{YPos, YPosItem, YPosItemKind};
 
 #[derive(Debug)]
 pub enum BlockStatesReader {
@@ -31,21 +31,33 @@ impl From<BlockStates> for BlockStatesReader {
     }
 }
 
-pub struct SectYItem<'a> {
-    pub y_in_section: u8,
-    pub paletted_block: &'a PalettedBlock,
+pub enum SectYItem<'a> {
+    Single {
+        paletted_block: &'a PalettedBlock,
+    },
+    Full {
+        y_in_section: u8,
+        paletted_block: &'a PalettedBlock,
+    },
 }
 
 impl<'a> SectYItem<'a> {
-    pub fn new(y_in_section: u8, paletted_block: &'a PalettedBlock) -> SectYItem<'a> {
-        SectYItem {
-            y_in_section,
-            paletted_block,
+    pub fn to_y_pos_item(self, section_y: i8) -> YPosItem<'a> {
+        match self {
+            SectYItem::Single { paletted_block } => YPosItem {
+                y_pos: YPos::new(section_y, 15),
+                paletted_block,
+                kind: YPosItemKind::Single,
+            },
+            SectYItem::Full {
+                y_in_section,
+                paletted_block,
+            } => YPosItem {
+                y_pos: YPos::new(section_y, y_in_section),
+                paletted_block,
+                kind: YPosItemKind::Full,
+            },
         }
-    }
-
-    pub fn to_y_pos_item(self, section_y: i8) -> (YPos, &'a PalettedBlock) {
-        (YPos::new(section_y, self.y_in_section), self.paletted_block)
     }
 }
 
@@ -60,7 +72,9 @@ impl SingleBlockStatesReader {
     }
 
     pub fn get_sect_y_item(&self) -> SectYItem {
-        SectYItem::new(15, self.get_block())
+        SectYItem::Single {
+            paletted_block: self.get_block(),
+        }
     }
 
     pub fn get_block(&self) -> &PalettedBlock {

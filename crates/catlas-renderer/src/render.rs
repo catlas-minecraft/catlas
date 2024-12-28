@@ -7,7 +7,7 @@ use fastanvil::Region;
 
 use crate::{
     error::{CatlasRenderError, Result},
-    RenderPreTile, RenderTile,
+    render_tile, PreTileRenderer,
 };
 
 const REGION_SIZE: usize = 32;
@@ -55,11 +55,11 @@ impl Render for ChunkReader {
                     .render_pre_tile(x, z);
 
                 north_y_coords[x as usize] = match &pre_rendered {
-                    Some(pre_rendered) => pre_rendered.y_pos_item.0.real_y(),
+                    Some(pre_rendered) => pre_rendered.get_y_pos().real_y(),
                     None => Chunk::Y_BOTTOM,
                 };
 
-                let map_color = self.sections.render_tile(x, z, north_y, pre_rendered);
+                let map_color = render_tile(north_y, pre_rendered);
 
                 map[z as usize * Section::SIZE as usize + x as usize] = map_color;
             }

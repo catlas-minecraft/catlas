@@ -20,7 +20,7 @@ impl Display for PalettedBlock {
             if properties.len() == 0 {
                 return write!(f, "{}", self.name.clone());
             };
-            let mut properties = properties.iter().collect::<Vec<_>>();
+            let mut properties: Vec<_> = properties.iter().collect();
 
             properties.sort_by(|(key_a, _), (key_b, _)| key_a.cmp(key_b));
 
