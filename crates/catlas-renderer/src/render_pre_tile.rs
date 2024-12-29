@@ -97,7 +97,10 @@ where
 
                 if is_render_as_water(&block_color, paletted_block) {
                     match y_pos_item.kind {
-                        catlas_reader::YPosItemKind::Single => deps += 10,
+                        catlas_reader::YPosItemKind::Single => {
+                            deps += 10;
+                            break;
+                        }
                         catlas_reader::YPosItemKind::Full => deps += 1,
                     }
                 } else {
