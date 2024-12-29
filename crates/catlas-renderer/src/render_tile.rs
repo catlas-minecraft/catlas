@@ -94,6 +94,16 @@ fn render_water_tile(deps: &WaterDepsLevel, x: u8, z: u8) -> MapColor {
     }
 }
 
+///
+/// Check the pettern  
+/// ```text
+/// \ x 0 1 2 3  
+/// z            
+/// 0   0 1 0 1  
+/// 1   1 0 1 0  
+/// 2   0 1 0 1  
+/// 3   1 0 1 0  
+/// ```
 fn to_checker_pattern_cell(x: u8, z: u8) -> bool {
     x & 1 ^ z & 1 == 0
 }
