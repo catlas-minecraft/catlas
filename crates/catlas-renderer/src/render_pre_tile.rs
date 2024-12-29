@@ -126,7 +126,7 @@ where
 }
 
 pub fn is_render_as_water(block_color: &BlockColor, paletted_block: &PalettedBlock) -> bool {
-    if paletted_block.name == "minecraft:water" {
+    if block_color.kind.is_water() {
         return true;
     }
 

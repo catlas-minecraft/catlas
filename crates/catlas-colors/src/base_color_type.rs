@@ -19,4 +19,15 @@ impl BaseColorType {
             _ => false,
         }
     }
+
+    pub fn is_water(&self) -> bool {
+        let BaseColorType::Normal(base_color) = self else {
+            return false;
+        };
+
+        match base_color {
+            BaseColor::Water => true,
+            _ => false,
+        }
+    }
 }
