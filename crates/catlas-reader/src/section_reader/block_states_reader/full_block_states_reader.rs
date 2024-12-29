@@ -144,7 +144,7 @@ impl<'a> Iterator for FullBlockStateYDirectionIter<'a> {
 
         Some(SectYItem::Full {
             y_in_section: y,
-            paletted_block: paletted_block,
+            paletted_block,
         })
     }
 }
