@@ -1,6 +1,6 @@
 use catlas_colors::{BlockAttributes, BlockColor, BASE_COLOR_MAP};
 use catlas_models::PalettedBlock;
-use catlas_reader::{SectionReader, YPos, YPosItem};
+use catlas_reader::{SectionReader, YPos, YPosItem, YPosItemKind};
 
 #[derive(Debug)]
 pub enum RenderedPreTile<'a> {
@@ -97,11 +97,11 @@ where
 
                 if is_render_as_water(&block_color, paletted_block) {
                     match y_pos_item.kind {
-                        catlas_reader::YPosItemKind::Single => {
+                        YPosItemKind::Single => {
                             deps += 10;
                             break;
                         }
-                        catlas_reader::YPosItemKind::Full => deps += 1,
+                        YPosItemKind::Full => deps += 1,
                     }
                 } else {
                     break;

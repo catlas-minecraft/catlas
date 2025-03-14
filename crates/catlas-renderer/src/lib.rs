@@ -1,5 +1,6 @@
 pub mod error;
 pub mod render;
+pub mod render_manager;
 pub mod render_pre_tile;
 pub mod render_tile;
 

@@ -1,8 +1,9 @@
 {
-  "deno.enable": true,
-  "deno.lint": false,
-  "deno.unstable": false,
   "rust-analyzer.linkedProjects": [
     "./Cargo.toml"
-  ]
+  ],
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    "editor.formatOnSave": true
+  }
 }

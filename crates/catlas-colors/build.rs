@@ -1,6 +1,3 @@
-#[macro_use]
-extern crate num_derive;
-
 mod blocks;
 mod map_color;
 
