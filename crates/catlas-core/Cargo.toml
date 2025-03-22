@@ -1,0 +1,12 @@
+[package]
+name = "catlas-core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+catlas-renderer.workspace = true
+catlas-models.workspace = true
+catlas-colors.workspace = true
+regex.workspace = true
+fastanvil.workspace = true
+image.workspace = true

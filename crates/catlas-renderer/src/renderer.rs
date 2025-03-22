@@ -10,7 +10,7 @@ use crate::{
     render_tile, PreTileRenderer,
 };
 
-const REGION_SIZE: usize = 32;
+pub const REGION_SIZE: usize = 32;
 
 pub trait Render {
     type Map;

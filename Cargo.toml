@@ -23,12 +23,14 @@ bitflags = "2.4.2"
 num-traits = "0.2"
 num-derive = "0.4.2"
 clap = "4.5.23"
+regex = "1.11.1"
 
 ## catlas
 catlas-colors = { path = "crates/catlas-colors" }
 catlas-models = { path = "crates/catlas-models" }
 catlas-reader = { path = "crates/catlas-reader" }
 catlas-renderer = { path = "crates/catlas-renderer" }
+catlas-core = { path = "crates/catlas-core" }
 
 [dependencies]
 fastanvil.workspace = true
