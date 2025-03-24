@@ -22,7 +22,7 @@ rustc-hash = "2.1.0"
 bitflags = "2.4.2"
 num-traits = "0.2"
 num-derive = "0.4.2"
-clap = "4.5.23"
+clap = { version = "4.5.32", features = [ "derive" ] }
 regex = "1.11.1"
 
 ## catlas
@@ -31,16 +31,8 @@ catlas-models = { path = "crates/catlas-models" }
 catlas-reader = { path = "crates/catlas-reader" }
 catlas-renderer = { path = "crates/catlas-renderer" }
 catlas-core = { path = "crates/catlas-core" }
+catlas-cli = { path = "crates/catlas-cli" }
 
 [dependencies]
-fastanvil.workspace = true
-fastnbt.workspace = true
-thiserror.workspace = true
-phf.workspace = true
-bitflags.workspace = true
-rustc-hash.workspace = true
-image.workspace = true
-catlas-colors.workspace = true
-catlas-models.workspace = true
-catlas-reader.workspace = true
-catlas-renderer.workspace = true
+catlas-cli.workspace = true
+clap.workspace = true

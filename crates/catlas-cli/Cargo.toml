@@ -1,0 +1,10 @@
+[package]
+name = "catlas-cli"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap.workspace = true
+catlas-core.workspace = true
+catlas-models.workspace = true
+image.workspace = true
