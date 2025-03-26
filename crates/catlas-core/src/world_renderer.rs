@@ -19,7 +19,7 @@ pub struct WorldRenderer {
 
 impl WorldRenderer {
     pub fn new<P: AsRef<Path>>(world_path: P) -> io::Result<WorldRenderer> {
-        let region_file_regex = Regex::new(r"^r\.(?<x>-?\d)\.(?<z>-?\d).mca$").unwrap();
+        let region_file_regex = Regex::new(r"^r\.(?<x>-?\d+)\.(?<z>-?\d+).mca$").unwrap();
         let world_path = world_path.as_ref();
 
         let mut regions: Vec<(i32, i32)> = fs::read_dir(world_path)?
