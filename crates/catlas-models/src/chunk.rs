@@ -15,6 +15,7 @@ use crate::ResolveByVersion;
 
 #[derive(Serialize, Debug, Clone)]
 pub struct Chunk {
+    pub data_version: u32,
     pub sections: Vec<Section>,
 
     pub x_pos: i32,
@@ -72,6 +73,7 @@ where
             let z_pos = self.z_pos.ok_or_else(|| de::Error::missing_field("zPos"))?;
 
             Ok(Chunk {
+                data_version,
                 sections,
                 x_pos,
                 z_pos,
@@ -90,6 +92,7 @@ where
                 .ok_or_else(|| de::Error::missing_field("zPos"))?;
 
             Ok(Chunk {
+                data_version,
                 sections,
                 x_pos,
                 z_pos,
