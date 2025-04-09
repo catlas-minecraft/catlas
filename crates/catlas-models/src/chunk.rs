@@ -62,7 +62,6 @@ where
 {
     fn resolve_by_version(self, data_version: u32) -> Result<Chunk, E> {
         // https://ja.minecraft.wiki/w/Java_Edition_21w43a
-
         if data_version >= 2844 {
             let sections = self
                 .sections

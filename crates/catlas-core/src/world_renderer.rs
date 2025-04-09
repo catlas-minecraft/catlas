@@ -64,7 +64,6 @@ impl Iterator for WorldRenderer {
         )
         .unwrap();
         let mut region = Region::from_stream(region).unwrap();
-        // println!("{region_x}, {region_z}");
 
         let map = region.render(&mut self.north_top_coords).unwrap();
 
