@@ -65,7 +65,14 @@ impl Iterator for WorldRenderer {
         .unwrap();
         let mut region = Region::from_stream(region).unwrap();
 
-        let map = region.render(&mut self.north_top_coords).unwrap();
+        let Ok(map) = region.render(&mut self.north_top_coords) else {
+            self.north_top_coords = [[0; Section::SIZE as usize]; REGION_SIZE];
+            return Some(WorldRenderResult {
+                map: vec![MapColor::none(); Section::SIZE as usize * Section::SIZE as usize],
+                x: region_x,
+                z: region_z,
+            });
+        };
 
         if let Some((next_region_x, next_region_z)) = self.regions_iter.peek() {
             if region_x != *next_region_x || region_z != (next_region_z - 1) {
